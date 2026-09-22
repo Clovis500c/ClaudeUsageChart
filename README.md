@@ -1,8 +1,12 @@
 # ClaudeUsageChart
 
+<<<<<<< HEAD
 <sub>Made by [**@Clovis500c**](https://github.com/Clovis500c)</sub>
 
 Your **Claude Code stats card** — sessions, prompts, tokens, models, tools and an activity heatmap — in your GitHub profile README, refreshed automatically.
+=======
+Your **Claude Code stats card** — sessions, messages, tokens, peak hour, favorite model and an activity heatmap — in your GitHub profile README, refreshed automatically.
+>>>>>>> origin/main
 
 <img src="example.svg" alt="example card" />
 

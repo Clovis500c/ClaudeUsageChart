@@ -20,6 +20,7 @@ Options
   --theme dark|light|auto  card theme (default: dark; auto follows the visitor's GitHub theme)
   --lang en|fr        card language (default: en)
   --range all|30d|7d  period for the numbers (default: all)
+  --name <user>       name shown on the card (default for push: repo owner)
   --out <dir>         local output folder for generate (default: .)
   --repo <owner/name> target repo for push (default: <you>/<you>)
   --dir <path>        folder inside the repo (default: claude-stats)
@@ -32,6 +33,7 @@ const { positionals, values: opt } = parseArgs({
     theme: { type: 'string', default: 'dark' },
     lang: { type: 'string', default: 'en' },
     range: { type: 'string', default: 'all' },
+    name: { type: 'string' },
     out: { type: 'string', default: '.' },
     repo: { type: 'string' },
     dir: { type: 'string', default: 'claude-stats' },
@@ -45,7 +47,7 @@ function build() {
   if (!events.length) throw new Error('No Claude Code transcripts found in ~/.claude/projects.');
   const stats = aggregate(events, opt.range);
   const counts = dailyCounts(events);
-  const card = (theme) => renderCard(stats, counts, { lang: opt.lang, theme });
+  const card = (theme) => renderCard(stats, counts, { lang: opt.lang, theme, name: opt.name });
   // auto = dark + light files, picked by the visitor's theme in the README
   const files = opt.theme === 'auto'
     ? { 'claude-stats.svg': card('dark'), 'claude-stats-light.svg': card('light') }
@@ -66,6 +68,7 @@ function snippet(repo, dir, branch = 'HEAD') {
 async function push(repo) {
   const token = getToken();
   if (!repo) { const login = await currentUser(token); repo = `${login}/${login}`; }
+  opt.name ??= repo.split('/')[0];
   const { stats, files } = build();
   let changed = 0;
   for (const [name, svg] of Object.entries(files)) {

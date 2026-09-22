@@ -1,5 +1,7 @@
 # ClaudeUsageChart
 
+<sub>Made by [**@Clovis500c**](https://github.com/Clovis500c)</sub>
+
 Your **Claude Code stats card** — sessions, messages, tokens, peak hour, favorite model and an activity heatmap — in your GitHub profile README, refreshed automatically.
 
 <img src="example.svg" alt="example card" />
@@ -40,7 +42,7 @@ Requirements: Node 18+, and either the [GitHub CLI](https://cli.github.com) logg
 | `claude-usage-chart push --repo owner/name` | Render and upload (only commits when something changed) |
 | `claude-usage-chart unschedule` | Remove the hourly refresh |
 
-Options: `--theme dark|light|auto`, `--lang en|fr`, `--range all|30d|7d`, `--dir <folder in repo>`, `--branch <name>`, `--out <local folder>`.
+Options: `--name <user>` (shown on the card, defaults to the repo owner), `--theme dark|light|auto`, `--lang en|fr`, `--range all|30d|7d`, `--dir <folder in repo>`, `--branch <name>`, `--out <local folder>`.
 
 ## Why not a GitHub Action like the snake?
 
@@ -59,6 +61,10 @@ Same method as the Claude desktop client's stats card:
 
 Note: stats only cover the transcripts still on disk. Claude Code can clean up old transcripts (see the `cleanupPeriodDays` setting in `~/.claude/settings.json`); raise it to keep a longer history.
 
+## Credits
+
+Created and maintained by [**Clovis500c**](https://github.com/Clovis500c). If you use it, a star on the repo is appreciated ⭐
+
 ## License
 
-MIT
+MIT © Clovis500c

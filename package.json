@@ -1,12 +1,32 @@
 {
   "name": "claude-usage-chart",
-  "version": "0.1.0",
-  "repository": { "type": "git", "url": "git+https://github.com/Clovis500c/ClaudeUsageChart.git" },
+  "version": "0.2.0",
   "description": "Show your Claude Code stats card (sessions, messages, tokens, activity heatmap) in your GitHub README, auto-refreshed.",
+  "author": "Clovis500c (https://github.com/Clovis500c)",
+  "homepage": "https://github.com/Clovis500c/ClaudeUsageChart#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clovis500c/ClaudeUsageChart.git"
+  },
   "type": "module",
-  "bin": { "claude-usage-chart": "bin/cli.js" },
-  "files": ["bin", "src"],
-  "engines": { "node": ">=18" },
-  "keywords": ["claude", "claude-code", "github", "readme", "stats", "svg", "profile"],
+  "bin": {
+    "claude-usage-chart": "bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "github",
+    "readme",
+    "stats",
+    "svg",
+    "profile"
+  ],
   "license": "MIT"
 }

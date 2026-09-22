@@ -32,7 +32,7 @@ Every part of the card can be tuned. `setup` asks for the main ones, or pass the
 |---|---|---|
 | `--theme dark|light|auto` | Card theme; `auto` follows the visitor's GitHub theme | `dark` |
 | `--palette <name>` | Heatmap colors: `blue`, `green`, `orange`, `purple`, `pink`, `gray` | `blue` |
-| `--accent <hex>` | Badge and bar color | `#d97757` |
+| `--accent <hex>` | Color of the Claude logo and the bars | `#d97757` |
 | `--title <text>` | Card title | `Claude Code usage` |
 | `--weeks <8-52>` | Heatmap length | `26` |
 | `--tiles <list>` | Which stat tiles to show, in order: `sessions`, `prompts`, `activeDays`, `streak`, `generated`, `toolCalls`, `peakHour`, `favorite`, `responses`, `processed` | first 8 |
@@ -116,6 +116,10 @@ Note: stats only cover the transcripts still on disk. Claude Code can clean up o
 ## Credits
 
 Created and maintained by [**Clovis500c**](https://github.com/Clovis500c). If you use it, a star on the repo is appreciated ⭐
+
+## Disclaimer
+
+This is a community project, not affiliated with or endorsed by Anthropic. Claude and the Claude logo are trademarks of Anthropic, used here only to identify the product the stats are about. The logo path comes from [Simple Icons](https://simpleicons.org) (CC0).
 
 ## License
 

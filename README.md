@@ -40,7 +40,7 @@ Requirements: Node 18+, and either the [GitHub CLI](https://cli.github.com) logg
 | `claude-usage-chart push --repo owner/name` | Render and upload (only commits when something changed) |
 | `claude-usage-chart unschedule` | Remove the hourly refresh |
 
-Options: `--theme dark|light|auto`, `--lang fr|en`, `--range all|30d|7d`, `--dir <folder in repo>`, `--branch <name>`, `--out <local folder>`.
+Options: `--theme dark|light|auto`, `--lang en|fr`, `--range all|30d|7d`, `--dir <folder in repo>`, `--branch <name>`, `--out <local folder>`.
 
 ## Why not a GitHub Action like the snake?
 

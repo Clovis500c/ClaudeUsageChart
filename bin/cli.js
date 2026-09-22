@@ -18,7 +18,7 @@ Usage
 
 Options
   --theme dark|light|auto  card theme (default: dark; auto follows the visitor's GitHub theme)
-  --lang fr|en        card language (default: fr)
+  --lang en|fr        card language (default: en)
   --range all|30d|7d  period for the numbers (default: all)
   --out <dir>         local output folder for generate (default: .)
   --repo <owner/name> target repo for push (default: <you>/<you>)
@@ -30,7 +30,7 @@ const { positionals, values: opt } = parseArgs({
   allowPositionals: true,
   options: {
     theme: { type: 'string', default: 'dark' },
-    lang: { type: 'string', default: 'fr' },
+    lang: { type: 'string', default: 'en' },
     range: { type: 'string', default: 'all' },
     out: { type: 'string', default: '.' },
     repo: { type: 'string' },
@@ -82,7 +82,7 @@ async function setup() {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   const ask = async (q, d) => (await rl.question(`${q} (${d}) `)).trim() || d;
   const repo = await ask('Repo to publish to?', `${login}/${login}`);
-  opt.lang = await ask('Language fr/en?', opt.lang);
+  opt.lang = await ask('Language en/fr?', opt.lang);
   opt.theme = await ask('Theme dark/light/auto?', opt.theme);
   const auto = (await ask('Refresh automatically every hour? y/n', 'y')).toLowerCase().startsWith('y');
   rl.close();

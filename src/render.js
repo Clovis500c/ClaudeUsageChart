@@ -4,14 +4,14 @@ import { dayKey } from './collect.js';
 
 const THEMES = {
   dark: {
-    bg: '#262624', tile: '#30302e', border: '#3a3a37', label: '#a6a39a', value: '#f5f4ef',
-    pill: '#3d3d3a', pillText: '#f5f4ef', muted: '#8f8c84',
-    cells: ['#383836', '#9cc3fb', '#74a8f5', '#4d8bef', '#2f6ee0'],
+    bg: '#262624', tile: '#30302e', label: '#8e8d88', value: '#e8e6e0',
+    pill: '#3a3a37', pillText: '#e8e6e0', muted: '#8e8d88', footer: '#9a9892',
+    cells: ['#363634', '#8db3f4', '#6f9ef0', '#4f86e8', '#2563d9'],
   },
   light: {
-    bg: '#faf9f5', tile: '#f0eee6', border: '#e3e0d6', label: '#6b6860', value: '#1f1e1d',
-    pill: '#e3e0d6', pillText: '#1f1e1d', muted: '#7a776f',
-    cells: ['#e8e6dc', '#c3dafe', '#8fb8fa', '#5b95f0', '#2f6ee0'],
+    bg: '#faf9f5', tile: '#f0eee6', label: '#7a776f', value: '#1f1e1d',
+    pill: '#e3e0d6', pillText: '#1f1e1d', muted: '#7a776f', footer: '#6b6860',
+    cells: ['#e6e4da', '#a9c7f7', '#7fa9f2', '#5289ea', '#2563d9'],
   },
 };
 
@@ -51,32 +51,31 @@ export function compact(n) {
   return String(n);
 }
 
-// Quartiles of the non-zero days decide the 4 color levels, like GitHub.
+// Intensity relative to the busiest day, like the client: most days light, peaks dark.
 function levels(counts) {
-  const v = [...counts.values()].filter((x) => x > 0).sort((a, b) => a - b);
-  if (!v.length) return () => 0;
-  const q = (p) => v[Math.min(v.length - 1, Math.floor(p * v.length))];
-  const t = [q(0.25), q(0.5), q(0.75)];
-  return (x) => (x <= 0 ? 0 : x <= t[0] ? 1 : x <= t[1] ? 2 : x <= t[2] ? 3 : 4);
+  const max = Math.max(0, ...counts.values());
+  return (x) => (x <= 0 ? 0 : Math.min(4, Math.ceil((x / max) * 4)));
 }
 
-export function renderCard(stats, counts, { theme = 'dark', lang = 'fr', weeks = 26, now = new Date() } = {}) {
+export function renderCard(stats, counts, { theme = 'dark', lang = 'en', weeks = 26, now = new Date() } = {}) {
   const c = THEMES[theme] || THEMES.dark;
-  const t = I18N[lang] || I18N.fr;
+  const t = I18N[lang] || I18N.en;
+  const num = (n) => n.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US');
   const W = 480, pad = 12;
   const out = [];
 
-  // Tabs row
-  const tab = (x, label, active, w) => {
+  // Tabs row; width is estimated from the label since SVG can't measure text
+  const tabW = (label) => Math.round(label.length * 6.8 + 14);
+  const tab = (x, label, active, w = tabW(label)) => {
     if (active) out.push(`<rect x="${x}" y="${pad}" width="${w}" height="20" rx="5" fill="${c.pill}"/>`);
     out.push(`<text x="${x + w / 2}" y="${pad + 14}" text-anchor="middle" font-size="12" ${active ? `font-weight="600" fill="${c.pillText}"` : `fill="${c.muted}"`}>${esc(label)}</text>`);
   };
-  tab(pad, t.overview, true, 52);
-  tab(pad + 54, t.models, false, 54);
+  tab(pad, t.overview, true);
+  tab(pad + tabW(t.overview) + 2, t.models, false);
   const ranges = ['all', '30d', '7d'];
   let rx = W - pad;
   for (const r of [...ranges].reverse()) {
-    const w = r === 'all' ? 36 : 26;
+    const w = tabW(t[r]);
     rx -= w;
     tab(rx, t[r], stats.range === r, w);
     rx -= 2;
@@ -84,10 +83,10 @@ export function renderCard(stats, counts, { theme = 'dark', lang = 'fr', weeks =
 
   // Stat tiles, 3 x 2
   const tiles = [
-    [t.sessions, stats.sessions],
-    [t.messages, stats.messages],
+    [t.sessions, num(stats.sessions)],
+    [t.messages, num(stats.messages)],
     [t.tokens, compact(stats.tokens)],
-    [t.activeDays, stats.activeDays],
+    [t.activeDays, num(stats.activeDays)],
     [t.peakHour, stats.peakHour == null ? '—' : t.hour(stats.peakHour)],
     [t.favorite, prettyModel(stats.favoriteModel)],
   ];
@@ -96,16 +95,16 @@ export function renderCard(stats, counts, { theme = 'dark', lang = 'fr', weeks =
     const x = pad + (i % 3) * (tw + gap);
     const y = ty0 + Math.floor(i / 3) * (th + gap);
     out.push(`<rect x="${x}" y="${y}" width="${tw}" height="${th}" rx="5" fill="${c.tile}"/>`);
-    out.push(`<text x="${x + 6}" y="${y + 16}" font-size="12" fill="${c.label}">${esc(label)}</text>`);
-    out.push(`<text x="${x + 6}" y="${y + 35}" font-size="14" font-weight="700" fill="${c.value}">${esc(value)}</text>`);
+    out.push(`<text x="${x + 6}" y="${y + 17}" font-size="12.5" fill="${c.label}">${esc(label)}</text>`);
+    out.push(`<text x="${x + 6}" y="${y + 36}" font-size="13.5" font-weight="600" fill="${c.value}">${esc(value)}</text>`);
   });
 
-  // Heatmap: columns = weeks (oldest → current), rows = Monday → Sunday
-  const hy = ty0 + th * 2 + gap + 12;
+  // Heatmap: columns = weeks (oldest → current), rows = Sunday → Saturday
+  const hy = ty0 + th * 2 + gap + 8;
   const step = (W - pad * 2 + 2.5) / weeks, cell = step - 2.5;
   const level = levels(counts);
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const dow = (today.getDay() + 6) % 7; // 0 = Monday
+  const dow = today.getDay(); // 0 = Sunday
   const start = new Date(today);
   start.setDate(today.getDate() - dow - (weeks - 1) * 7);
   for (let w = 0; w < weeks; w++) {
@@ -119,14 +118,14 @@ export function renderCard(stats, counts, { theme = 'dark', lang = 'fr', weeks =
   }
 
   // Footer fun fact
-  const fy = hy + 7 * step + 14;
+  const fy = hy + 7 * step + 16;
   const ratio = Math.round(stats.tokens / GATSBY_TOKENS);
-  if (ratio >= 2) out.push(`<text x="${pad}" y="${fy}" font-size="11" fill="${c.label}">${esc(t.gatsby(ratio))}</text>`);
+  if (ratio >= 2) out.push(`<text x="${pad}" y="${fy}" font-size="11.5" fill="${c.footer}">${esc(t.gatsby(ratio))}</text>`);
 
   const H = Math.round(fy + pad);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="${FONT}">
 <title>Claude stats</title>
-<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="9" fill="${c.bg}" stroke="${c.border}"/>
+<rect width="${W}" height="${H}" rx="10" fill="${c.bg}"/>
 ${out.join('\n')}
 </svg>
 `;

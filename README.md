@@ -47,7 +47,7 @@ Requirements: Node 18+, and either the [GitHub CLI](https://cli.github.com) logg
 
 A job (Windows Task Scheduler, or cron on macOS/Linux) wakes up every hour and only uploads once the chosen interval has passed since the last upload. If your computer was off when a refresh was due, it happens within an hour of it being back on. Nothing is uploaded when the numbers haven't changed.
 
-Options: `--name <user>` (shown on the card, defaults to the repo owner), `--theme dark|light|auto`, `--lang en|fr`, `--range all|30d|7d`, `--dir <folder in repo>`, `--branch <name>`, `--out <local folder>`.
+Options: `--hide-tools`, `--name <user>` (shown on the card, defaults to the repo owner), `--theme dark|light|auto`, `--lang en|fr`, `--range all|30d|7d`, `--dir <folder in repo>`, `--branch <name>`, `--out <local folder>`.
 
 ## Why not a GitHub Action like the snake?
 
@@ -55,7 +55,7 @@ The contribution snake reads data that lives on GitHub. Your Claude usage only l
 
 ## Privacy
 
-Only aggregated numbers end up in the SVG (counts, token total, per-day message counts, model name). No prompts, file names or project names leave your machine.
+Only aggregated numbers end up in the SVG: counts, token totals, per-day prompt counts, model names and the names of your most-used tools. No prompts, code, file names or project names leave your machine. Use `--hide-tools` to leave tool names off the card.
 
 ## How the numbers are computed
 
@@ -68,12 +68,29 @@ Claude Code transcripts (`~/.claude/projects/**/*.jsonl`) contain a lot of repet
 |---|---|
 | Sessions | Distinct Claude Code sessions |
 | Prompts | Messages you typed (no tool results, no system messages) |
-| Tokens processed | Input + output + cache writes + cache reads, over every response. Cache reads dominate: each turn re-reads the conversation context |
-| Active days | Days with at least one prompt or response |
+| Active days · Longest streak | Days with at least one prompt or response · most consecutive such days |
+| Tokens generated | Output tokens: everything Claude wrote (text, code, tool calls, thinking) |
+| Tool calls · Top tools | Tool uses Claude made (each counted once) · the most frequent ones |
 | Peak hour | Hour of the day with the most prompts |
 | Favorite model | Model that generated the most output tokens |
 | Heatmap | Prompts per day over the last 26 weeks |
-| Gatsby line | Output tokens ÷ ~61,000 (The Great Gatsby ≈ 47,094 words × ~1.3 tokens/word). An estimate: output also includes code and tool calls |
+| **Tokens** bar | *Written by Claude* = output · *Added to context* = input + cache writes (files read, command results…) · *Re-read from cache* = cache reads: on every step Claude re-reads the whole conversation, which is why this part is by far the biggest |
+| **Models** bar | Share of output tokens per model |
+| Book line | Output tokens compared with a book's length (see below) |
+
+### The book comparison
+
+Book lengths use commonly cited English word counts, converted at ~1.3 tokens per word, so it's an estimate (output also contains code and tool calls). The card picks the longest book Claude's output fits into at least 10 times, so the number stays readable:
+
+| Book | Words |
+|---|---|
+| The Great Gatsby | 47,094 |
+| Harry Potter and the Philosopher's Stone | 76,944 |
+| The Hobbit | 95,356 |
+| Moby-Dick | 206,052 |
+| The Lord of the Rings | 481,103 |
+| The King James Bible | 783,137 |
+| In Search of Lost Time | 1,267,069 |
 
 Subagent traffic is excluded. Numbers can differ from the Claude app's stats card, which sums the repeated lines.
 

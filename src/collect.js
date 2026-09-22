@@ -40,10 +40,11 @@ function promptText(o) {
   return c.find((b) => b.type === 'text')?.text ?? '';
 }
 
-// Returns { prompts: [{ts, session}], responses: [{ts, session, model, usage}] }
+// Returns { prompts: [{ts, session}], responses: [{ts, session, model, usage}], tools: [{ts, name}] }
 export function loadEvents(dir = path.join(claudeDir(), 'projects')) {
   const prompts = new Map(); // uuid → prompt
   const responses = new Map(); // message id → response
+  const tools = new Map(); // tool_use block id → call
   for (const file of listTranscripts(dir)) {
     let text;
     try { text = fs.readFileSync(file, 'utf8'); } catch { continue; }
@@ -58,6 +59,9 @@ export function loadEvents(dir = path.join(claudeDir(), 'projects')) {
         const t = promptText(o);
         if (t != null && !SYNTHETIC.test(t.trimStart())) prompts.set(o.uuid, { ts, session: o.sessionId });
       } else if (o.type === 'assistant' && o.message?.id && o.message.usage) {
+        for (const b of o.message.content || []) {
+          if (b.type === 'tool_use' && b.id && !tools.has(b.id)) tools.set(b.id, { ts, name: b.name });
+        }
         const u = o.message.usage;
         const prev = responses.get(o.message.id);
         // Streaming lines can carry partial counts; keep the largest of each.
@@ -76,16 +80,32 @@ export function loadEvents(dir = path.join(claudeDir(), 'projects')) {
       }
     }
   }
-  return { prompts: [...prompts.values()], responses: [...responses.values()] };
+  return { prompts: [...prompts.values()], responses: [...responses.values()], tools: [...tools.values()] };
 }
 
 const RANGES = { all: Infinity, '30d': 30, '7d': 7 };
 
-export function aggregate({ prompts, responses }, range = 'all') {
+// Longest run of consecutive calendar days found in a set of day keys.
+function longestStreak(dayKeys) {
+  const days = [...dayKeys].sort();
+  let best = 0, run = 0, prev = null;
+  for (const k of days) {
+    const d = new Date(`${k}T12:00:00`);
+    run = prev && Math.round((d - prev) / 86400000) === 1 ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = d;
+  }
+  return best;
+}
+
+const toolName = (n) => (n?.startsWith('mcp__') ? n.split('__').slice(2).join('__') || n : n);
+
+export function aggregate({ prompts, responses, tools = [] }, range = 'all') {
   const days = RANGES[range] ?? Infinity;
   const since = days === Infinity ? 0 : Date.now() - days * 86400000;
   const P = prompts.filter((e) => e.ts.getTime() >= since);
   const R = responses.filter((e) => e.ts.getTime() >= since);
+  const T = tools.filter((e) => e.ts.getTime() >= since);
 
   const sessions = new Set();
   const activeDays = new Set();
@@ -109,8 +129,19 @@ export function aggregate({ prompts, responses }, range = 'all') {
     if (e.model && !e.model.startsWith('<')) models.set(e.model, (models.get(e.model) || 0) + u.output_tokens);
   }
 
+  const toolCounts = new Map();
+  for (const e of T) {
+    const n = toolName(e.name);
+    toolCounts.set(n, (toolCounts.get(n) || 0) + 1);
+  }
+  const byModel = [...models.entries()].sort((a, b) => b[1] - a[1]);
+
   return {
     range,
+    toolCalls: T.length,
+    topTools: [...toolCounts.entries()].sort((a, b) => b[1] - a[1]),
+    models: byModel.map(([model, output]) => ({ model, output })),
+    longestStreak: longestStreak(activeDays),
     sessions: sessions.size,
     prompts: P.length,
     responses: R.length,
@@ -118,7 +149,7 @@ export function aggregate({ prompts, responses }, range = 'all') {
     tokensTotal: tokens.input + tokens.output + tokens.cacheWrite + tokens.cacheRead,
     activeDays: activeDays.size,
     peakHour: P.length ? hours.indexOf(Math.max(...hours)) : null, // hour with the most prompts
-    favoriteModel: [...models.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null, // most output
+    favoriteModel: byModel[0]?.[0] ?? null, // most output
   };
 }
 

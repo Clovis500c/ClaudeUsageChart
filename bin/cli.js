@@ -23,6 +23,7 @@ Options
   --lang en|fr             card language (default: en)
   --range all|30d|7d       period for the numbers (default: all)
   --name <user>            name shown on the card (default: repo owner)
+  --hide-tools             don't show tool names on the card
   --dir <path>             folder inside the repo (default: claude-stats)
   --branch <name>          target branch (default: repo default)
   --out <dir>              local output folder for generate (default: .)
@@ -41,6 +42,7 @@ const { positionals, values: opt } = parseArgs({
     dir: { type: 'string', default: 'claude-stats' },
     branch: { type: 'string' },
     every: { type: 'string' },
+    'hide-tools': { type: 'boolean', default: false },
     help: { type: 'boolean', short: 'h' },
   },
 });
@@ -50,7 +52,7 @@ function build() {
   if (!events.prompts.length && !events.responses.length) throw new Error('No Claude Code transcripts found in ~/.claude/projects.');
   const stats = aggregate(events, opt.range);
   const counts = dailyCounts(events);
-  const card = (theme) => renderCard(stats, counts, { lang: opt.lang, theme, name: opt.name });
+  const card = (theme) => renderCard(stats, counts, { lang: opt.lang, theme, name: opt.name, hideTools: opt['hide-tools'] });
   // auto = dark + light files, picked by the visitor's theme in the README
   const files = opt.theme === 'auto'
     ? { 'claude-stats.svg': card('dark'), 'claude-stats-light.svg': card('light') }
@@ -96,6 +98,7 @@ async function push() {
 const jobArgs = () => {
   const a = ['push', '--repo', opt.repo, '--theme', opt.theme, '--lang', opt.lang, '--range', opt.range, '--dir', opt.dir, '--name', opt.name];
   if (opt.branch) a.push('--branch', opt.branch);
+  if (opt['hide-tools']) a.push('--hide-tools');
   return a;
 };
 

@@ -21,10 +21,10 @@ const I18N = {
     title: 'Claude Code usage',
     range: { all: 'All time', '30d': 'Last 30 days', '7d': 'Last 7 days' },
     updated: (d) => `updated ${d}`,
-    sessions: 'Sessions', messages: 'Messages', tokens: 'Tokens',
+    sessions: 'Sessions', prompts: 'Prompts', tokens: 'Tokens processed',
     activeDays: 'Active days', peakHour: 'Peak hour', favorite: 'Favorite model',
     hour: (h) => `${h % 12 || 12} ${h < 12 ? 'AM' : 'PM'}`,
-    gatsby: (n) => `≈ ${n}× The Great Gatsby, in tokens`,
+    gatsby: (n) => `Claude generated ≈ ${n}× the length of The Great Gatsby`,
     less: 'Less', more: 'More',
   },
   fr: {
@@ -32,15 +32,17 @@ const I18N = {
     title: 'Utilisation de Claude Code',
     range: { all: 'Depuis le début', '30d': '30 derniers jours', '7d': '7 derniers jours' },
     updated: (d) => `mis à jour le ${d}`,
-    sessions: 'Sessions', messages: 'Messages', tokens: 'Tokens',
+    sessions: 'Sessions', prompts: 'Prompts', tokens: 'Tokens traités',
     activeDays: 'Jours actifs', peakHour: 'Heure de pointe', favorite: 'Modèle favori',
     hour: (h) => `${String(h).padStart(2, '0')} h`,
-    gatsby: (n) => `≈ ${n}× Gatsby le Magnifique, en tokens`,
+    gatsby: (n) => `Claude a généré ≈ ${n}× la longueur de Gatsby le Magnifique`,
     less: 'Moins', more: 'Plus',
   },
 };
 
-const GATSBY_TOKENS = 62000;
+// The Great Gatsby: 47,094 words × ~1.3 tokens per English word ≈ 61k tokens.
+// Compared against output tokens only (what Claude actually generated).
+const GATSBY_TOKENS = 61000;
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -83,8 +85,8 @@ export function renderCard(stats, counts, { theme = 'dark', lang = 'en', name, w
   // Stat tiles, 3 x 2
   const tiles = [
     [t.sessions, num(stats.sessions)],
-    [t.messages, num(stats.messages)],
-    [t.tokens, compact(stats.tokens)],
+    [t.prompts, num(stats.prompts)],
+    [t.tokens, compact(stats.tokensTotal)],
     [t.activeDays, num(stats.activeDays)],
     [t.peakHour, stats.peakHour == null ? '—' : t.hour(stats.peakHour)],
     [t.favorite, prettyModel(stats.favoriteModel)],
@@ -134,8 +136,11 @@ export function renderCard(stats, counts, { theme = 'dark', lang = 'en', name, w
 
   // Footer: fun fact on the left, legend on the right
   const fy = hy + 7 * step + 16;
-  const ratio = Math.round(stats.tokens / GATSBY_TOKENS);
-  if (ratio >= 2) out.push(`<text x="${pad}" y="${fy}" font-size="11" fill="${c.muted}">${esc(t.gatsby(ratio))}</text>`);
+  const ratio = stats.tokens.output / GATSBY_TOKENS;
+  if (ratio >= 0.1) {
+    const n = ratio >= 10 ? num(Math.round(ratio)) : ratio.toLocaleString(t.locale, { maximumFractionDigits: 1 });
+    out.push(`<text x="${pad}" y="${fy}" font-size="11" fill="${c.muted}">${esc(t.gatsby(n))}</text>`);
+  }
   const sq = 10, sgap = 3;
   let lx = W - pad;
   out.push(`<text x="${lx}" y="${fy}" text-anchor="end" font-size="11" fill="${c.muted}">${esc(t.more)}</text>`);

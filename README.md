@@ -16,7 +16,7 @@ It will:
 1. read your local Claude Code history (`~/.claude/projects`),
 2. render the card (dark by default),
 3. upload it to your profile repo (`<you>/<you>` by default),
-4. schedule an hourly refresh on your machine,
+4. ask how often it should refresh (every hour → once a week, or never),
 5. print the snippet to paste in your `README.md`:
 
 ```html
@@ -37,10 +37,15 @@ Requirements: Node 18+, and either the [GitHub CLI](https://cli.github.com) logg
 
 | Command | What it does |
 |---|---|
-| `claude-usage-chart setup` | Guided setup (push + hourly refresh + snippet) |
+| `claude-usage-chart setup` | Guided setup (publish + refresh frequency + snippet) |
 | `claude-usage-chart` | Write `claude-stats.svg` in the current folder |
-| `claude-usage-chart push --repo owner/name` | Render and upload (only commits when something changed) |
-| `claude-usage-chart unschedule` | Remove the hourly refresh |
+| `claude-usage-chart push` | Render and upload (only commits when something changed) |
+| `claude-usage-chart schedule --every 1d` | Change the refresh frequency: `1h`, `6h`, `12h`, `1d`, `7d` |
+| `claude-usage-chart unschedule` | Stop the automatic refresh |
+
+### How the automatic refresh works
+
+A job (Windows Task Scheduler, or cron on macOS/Linux) wakes up every hour and only uploads once the chosen interval has passed since the last upload. If your computer was off when a refresh was due, it happens within an hour of it being back on. Nothing is uploaded when the numbers haven't changed.
 
 Options: `--name <user>` (shown on the card, defaults to the repo owner), `--theme dark|light|auto`, `--lang en|fr`, `--range all|30d|7d`, `--dir <folder in repo>`, `--branch <name>`, `--out <local folder>`.
 
@@ -54,10 +59,23 @@ Only aggregated numbers end up in the SVG (counts, token total, per-day message 
 
 ## How the numbers are computed
 
-Same method as the Claude desktop client's stats card:
-- **Sessions**: distinct session ids · **Messages**: user + assistant turns (subagents excluded)
-- **Total tokens**: input + output tokens · **Peak hour**: hour at which sessions most often start
-- **Heatmap**: messages per day over the last 26 weeks
+Claude Code transcripts (`~/.claude/projects/**/*.jsonl`) contain a lot of repetition, so they are de-duplicated before counting:
+- one API response is written as several lines (one per content block), each repeating the same token usage → each response is counted **once**;
+- resumed sessions copy earlier messages into a new file → each message id is counted **once**;
+- most "user" lines are tool results or system notices → only messages you actually typed count as **prompts**.
+
+| Stat | Definition |
+|---|---|
+| Sessions | Distinct Claude Code sessions |
+| Prompts | Messages you typed (no tool results, no system messages) |
+| Tokens processed | Input + output + cache writes + cache reads, over every response. Cache reads dominate: each turn re-reads the conversation context |
+| Active days | Days with at least one prompt or response |
+| Peak hour | Hour of the day with the most prompts |
+| Favorite model | Model that generated the most output tokens |
+| Heatmap | Prompts per day over the last 26 weeks |
+| Gatsby line | Output tokens ÷ ~61,000 (The Great Gatsby ≈ 47,094 words × ~1.3 tokens/word). An estimate: output also includes code and tool calls |
+
+Subagent traffic is excluded. Numbers can differ from the Claude app's stats card, which sums the repeated lines.
 
 Note: stats only cover the transcripts still on disk. Claude Code can clean up old transcripts (see the `cleanupPeriodDays` setting in `~/.claude/settings.json`); raise it to keep a longer history.
 

@@ -9,17 +9,17 @@
 <text x="22" y="76" font-size="11.5" fill="#8e8d88">Sessions</text>
 <text x="22" y="95" font-size="15" font-weight="600" fill="#e8e6e0">64</text>
 <rect x="166.66666666666666" y="58" width="146.66666666666666" height="46" rx="6" fill="#30302e"/>
-<text x="174.66666666666666" y="76" font-size="11.5" fill="#8e8d88">Messages</text>
-<text x="174.66666666666666" y="95" font-size="15" font-weight="600" fill="#e8e6e0">52,613</text>
+<text x="174.66666666666666" y="76" font-size="11.5" fill="#8e8d88">Prompts</text>
+<text x="174.66666666666666" y="95" font-size="15" font-weight="600" fill="#e8e6e0">652</text>
 <rect x="319.3333333333333" y="58" width="146.66666666666666" height="46" rx="6" fill="#30302e"/>
-<text x="327.3333333333333" y="76" font-size="11.5" fill="#8e8d88">Tokens</text>
-<text x="327.3333333333333" y="95" font-size="15" font-weight="600" fill="#e8e6e0">38.4M</text>
+<text x="327.3333333333333" y="76" font-size="11.5" fill="#8e8d88">Tokens processed</text>
+<text x="327.3333333333333" y="95" font-size="15" font-weight="600" fill="#e8e6e0">3.3B</text>
 <rect x="14" y="110" width="146.66666666666666" height="46" rx="6" fill="#30302e"/>
 <text x="22" y="128" font-size="11.5" fill="#8e8d88">Active days</text>
 <text x="22" y="147" font-size="15" font-weight="600" fill="#e8e6e0">29</text>
 <rect x="166.66666666666666" y="110" width="146.66666666666666" height="46" rx="6" fill="#30302e"/>
 <text x="174.66666666666666" y="128" font-size="11.5" fill="#8e8d88">Peak hour</text>
-<text x="174.66666666666666" y="147" font-size="15" font-weight="600" fill="#e8e6e0">6 AM</text>
+<text x="174.66666666666666" y="147" font-size="15" font-weight="600" fill="#e8e6e0">5 PM</text>
 <rect x="319.3333333333333" y="110" width="146.66666666666666" height="46" rx="6" fill="#30302e"/>
 <text x="327.3333333333333" y="128" font-size="11.5" fill="#8e8d88">Favorite model</text>
 <text x="327.3333333333333" y="147" font-size="15" font-weight="600" fill="#e8e6e0">Opus 5</text>
@@ -121,7 +121,7 @@
 <rect x="223.8" y="271.4" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="223.8" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="241.3" y="184.0" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
-<rect x="241.3" y="201.5" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
+<rect x="241.3" y="201.5" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
 <rect x="241.3" y="219.0" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="241.3" y="236.4" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="241.3" y="253.9" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
@@ -168,20 +168,20 @@
 <rect x="346.1" y="236.4" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="346.1" y="253.9" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="346.1" y="271.4" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
-<rect x="346.1" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
+<rect x="346.1" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
 <rect x="363.6" y="184.0" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="363.6" y="201.5" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
-<rect x="363.6" y="219.0" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
+<rect x="363.6" y="219.0" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
 <rect x="363.6" y="236.4" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="363.6" y="253.9" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="363.6" y="271.4" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
-<rect x="363.6" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
+<rect x="363.6" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#4f86e8"/>
 <rect x="381.1" y="184.0" width="15.0" height="15.0" rx="2.5" fill="#2563d9"/>
 <rect x="381.1" y="201.5" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
 <rect x="381.1" y="219.0" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="381.1" y="236.4" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="381.1" y="253.9" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
-<rect x="381.1" y="271.4" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
+<rect x="381.1" y="271.4" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
 <rect x="381.1" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="398.6" y="184.0" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="398.6" y="201.5" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
@@ -190,8 +190,8 @@
 <rect x="398.6" y="253.9" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="398.6" y="271.4" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="398.6" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
-<rect x="416.1" y="184.0" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
-<rect x="416.1" y="201.5" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
+<rect x="416.1" y="184.0" width="15.0" height="15.0" rx="2.5" fill="#4f86e8"/>
+<rect x="416.1" y="201.5" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="416.1" y="219.0" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="416.1" y="236.4" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="416.1" y="253.9" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
@@ -203,11 +203,11 @@
 <rect x="433.5" y="236.4" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="433.5" y="253.9" width="15.0" height="15.0" rx="2.5" fill="#363634"/>
 <rect x="433.5" y="271.4" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
-<rect x="433.5" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
+<rect x="433.5" y="288.9" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
 <rect x="451.0" y="184.0" width="15.0" height="15.0" rx="2.5" fill="#6f9ef0"/>
 <rect x="451.0" y="201.5" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
 <rect x="451.0" y="219.0" width="15.0" height="15.0" rx="2.5" fill="#8db3f4"/>
-<text x="14" y="322.36538461538464" font-size="11" fill="#8e8d88">≈ 620× The Great Gatsby, in tokens</text>
+<text x="14" y="322.36538461538464" font-size="11" fill="#8e8d88">Claude generated ≈ 125× the length of The Great Gatsby</text>
 <text x="466" y="322.36538461538464" text-anchor="end" font-size="11" fill="#8e8d88">More</text>
 <rect x="427.8" y="313.36538461538464" width="10" height="10" rx="2" fill="#2563d9"/>
 <rect x="414.8" y="313.36538461538464" width="10" height="10" rx="2" fill="#4f86e8"/>

@@ -2,12 +2,15 @@
 
 Your **Claude Code stats card** — sessions, prompts, tokens, models, tools and an activity heatmap — in your GitHub profile README, refreshed automatically.
 
-<img src="example.svg" alt="example card" />
+<img src="examples/default.svg" alt="example card" />
 
 ## Quick start
 
+Install the latest release, then run the guided setup:
+
 ```bash
-npx claude-usage-chart setup
+npm i -g https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download/claude-usage-chart.tgz
+claude-usage-chart setup
 ```
 
 It will:
@@ -21,15 +24,33 @@ It will:
 <img alt="Claude stats" src="https://raw.githubusercontent.com/<you>/<you>/HEAD/claude-stats/claude-stats.svg" />
 ```
 
-## Themes
+## Customization
 
-| `--theme` | Result |
+Every part of the card can be tuned. `setup` asks for the main ones, or pass them as options (they are kept for the automatic refresh).
+
+| Option | What it does | Default |
+|---|---|---|
+| `--theme dark|light|auto` | Card theme; `auto` follows the visitor's GitHub theme | `dark` |
+| `--palette <name>` | Heatmap colors: `blue`, `green`, `orange`, `purple`, `pink`, `gray` | `blue` |
+| `--accent <hex>` | Badge and bar color | `#d97757` |
+| `--title <text>` | Card title | `Claude Code usage` |
+| `--weeks <8-52>` | Heatmap length | `26` |
+| `--tiles <list>` | Which stat tiles to show, in order: `sessions`, `prompts`, `activeDays`, `streak`, `generated`, `toolCalls`, `peakHour`, `favorite`, `responses`, `processed` | first 8 |
+| `--hide <list>` | Sections to leave out: `header`, `tiles`, `heatmap`, `book`, `tokens`, `models`, `tools` | none |
+| `--transparent` | No card background | off |
+| `--lang en|fr` | Language | `en` |
+| `--range all|30d|7d` | Period for the numbers | `all` |
+| `--name <user>` | Name in the header | repo owner |
+
+### Examples
+
+| | |
 |---|---|
-| `dark` (default) | Dark card, like the Claude app |
-| `light` | Light card |
-| `auto` | Both versions; the README shows the one matching the visitor's GitHub theme (the snippet uses a `<picture>` tag) |
+| <img src="examples/green-52-weeks.svg" width="400" /><br>`--palette green --accent "#39d353" --weeks 52` | <img src="examples/purple-compact.svg" width="400" /><br>`--palette purple --accent "#8c70e6" --title "My AI pair-programming" --hide tokens,models,tools` |
+| <img src="examples/light-pink.svg" width="400" /><br>`--theme light --palette pink --accent "#cc4589" --hide tools` | <img src="examples/stats-only.svg" width="400" /><br>`--tiles prompts,generated,streak,favorite --hide heatmap,tools --palette orange` |
+| <img src="examples/heatmap-only.svg" width="400" /><br>`--hide header,tiles,book,tokens,models,tools --palette gray --transparent` | |
 
-Requirements: Node 18+, and either the [GitHub CLI](https://cli.github.com) logged in (`gh auth login`) or a `GITHUB_TOKEN` env var with `contents: write` on the target repo.
+Try a look locally before publishing: `claude-usage-chart --palette green --out preview` writes `preview/claude-stats.svg`.
 
 ## Commands
 
@@ -44,8 +65,6 @@ Requirements: Node 18+, and either the [GitHub CLI](https://cli.github.com) logg
 ### How the automatic refresh works
 
 A job (Windows Task Scheduler, or cron on macOS/Linux) wakes up every hour and only uploads once the chosen interval has passed since the last upload. If your computer was off when a refresh was due, it happens within an hour of it being back on. Nothing is uploaded when the numbers haven't changed.
-
-Options: `--hide-tools`, `--name <user>` (shown on the card, defaults to the repo owner), `--theme dark|light|auto`, `--lang en|fr`, `--range all|30d|7d`, `--dir <folder in repo>`, `--branch <name>`, `--out <local folder>`.
 
 ## Why not a GitHub Action like the snake?
 

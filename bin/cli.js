@@ -4,7 +4,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { createInterface } from 'node:readline/promises';
 import { loadEvents, aggregate, dailyCounts } from '../src/collect.js';
-import { renderCard } from '../src/render.js';
+import { renderCard, PALETTES, SECTIONS, TILES, DEFAULT_TILES, parseColor } from '../src/render.js';
 import { getToken, currentUser, putFile } from '../src/github.js';
 import { schedule, unschedule, isDue, markPushed, FREQUENCIES } from '../src/schedule.js';
 
@@ -23,7 +23,17 @@ Options
   --lang en|fr             card language (default: en)
   --range all|30d|7d       period for the numbers (default: all)
   --name <user>            name shown on the card (default: repo owner)
-  --hide-tools             don't show tool names on the card
+
+Look
+  --title <text>           card title (default: "Claude Code usage")
+  --palette <name>         heatmap colors: ${Object.keys(PALETTES).join(', ')} (default: blue)
+  --accent <hex>           accent color for the badge and bars (default: #d97757)
+  --weeks <n>              weeks shown in the heatmap, 8-52 (default: 26)
+  --tiles <list>           stat tiles to show, in order (default: ${DEFAULT_TILES.join(',')})
+                           available: ${TILES.join(', ')}
+  --hide <list>            sections to leave out: ${SECTIONS.join(', ')}
+  --hide-tools             same as --hide tools
+  --transparent            no card background
   --dir <path>             folder inside the repo (default: claude-stats)
   --branch <name>          target branch (default: repo default)
   --out <dir>              local output folder for generate (default: .)
@@ -43,16 +53,42 @@ const { positionals, values: opt } = parseArgs({
     branch: { type: 'string' },
     every: { type: 'string' },
     'hide-tools': { type: 'boolean', default: false },
+    title: { type: 'string' },
+    palette: { type: 'string', default: 'blue' },
+    accent: { type: 'string' },
+    weeks: { type: 'string', default: '26' },
+    tiles: { type: 'string' },
+    hide: { type: 'string' },
+    transparent: { type: 'boolean', default: false },
     help: { type: 'boolean', short: 'h' },
   },
 });
 
+const list = (s) => (s ? s.split(',').map((x) => x.trim()).filter(Boolean) : []);
+
+// Validates look options up front so a typo fails loudly instead of silently.
+function lookOptions() {
+  if (!PALETTES[opt.palette]) throw new Error(`Unknown palette "${opt.palette}". Use one of: ${Object.keys(PALETTES).join(', ')}`);
+  if (opt.accent && !parseColor(opt.accent)) throw new Error(`Invalid --accent "${opt.accent}". Use a hex color like #d97757`);
+  const weeks = Number(opt.weeks);
+  if (!Number.isInteger(weeks) || weeks < 8 || weeks > 52) throw new Error('--weeks must be a whole number from 8 to 52');
+  const hide = list(opt.hide);
+  if (opt['hide-tools']) hide.push('tools');
+  const badHide = hide.filter((h) => !SECTIONS.includes(h));
+  if (badHide.length) throw new Error(`Unknown section(s) in --hide: ${badHide.join(', ')}. Available: ${SECTIONS.join(', ')}`);
+  const tiles = opt.tiles ? list(opt.tiles) : DEFAULT_TILES;
+  const badTiles = tiles.filter((k) => !TILES.includes(k));
+  if (badTiles.length) throw new Error(`Unknown tile(s) in --tiles: ${badTiles.join(', ')}. Available: ${TILES.join(', ')}`);
+  return { title: opt.title, palette: opt.palette, accent: opt.accent, weeks, hide, tiles, transparent: opt.transparent };
+}
+
 function build() {
+  const look = lookOptions();
   const events = loadEvents();
   if (!events.prompts.length && !events.responses.length) throw new Error('No Claude Code transcripts found in ~/.claude/projects.');
   const stats = aggregate(events, opt.range);
   const counts = dailyCounts(events);
-  const card = (theme) => renderCard(stats, counts, { lang: opt.lang, theme, name: opt.name, hideTools: opt['hide-tools'] });
+  const card = (theme) => renderCard(stats, counts, { ...look, lang: opt.lang, theme, name: opt.name });
   // auto = dark + light files, picked by the visitor's theme in the README
   const files = opt.theme === 'auto'
     ? { 'claude-stats.svg': card('dark'), 'claude-stats-light.svg': card('light') }
@@ -97,8 +133,9 @@ async function push() {
 // Arguments the scheduled job re-runs push with.
 const jobArgs = () => {
   const a = ['push', '--repo', opt.repo, '--theme', opt.theme, '--lang', opt.lang, '--range', opt.range, '--dir', opt.dir, '--name', opt.name];
-  if (opt.branch) a.push('--branch', opt.branch);
-  if (opt['hide-tools']) a.push('--hide-tools');
+  // Forward every option the user set, so the scheduled card looks the same.
+  for (const k of ['branch', 'title', 'palette', 'accent', 'weeks', 'tiles', 'hide']) if (opt[k] != null) a.push(`--${k}`, String(opt[k]));
+  for (const k of ['hide-tools', 'transparent']) if (opt[k]) a.push(`--${k}`);
   return a;
 };
 
@@ -120,6 +157,14 @@ async function setup() {
   opt.repo = await ask('Repo to publish to?', opt.repo || `${login}/${login}`);
   opt.lang = await ask('Language en/fr?', opt.lang);
   opt.theme = await ask('Theme dark/light/auto?', opt.theme);
+  if ((await ask('Customize colors and sections? y/n', 'n')).toLowerCase().startsWith('y')) {
+    opt.palette = await ask(`Heatmap palette (${Object.keys(PALETTES).join('/')})?`, opt.palette);
+    opt.accent = await ask('Accent color (hex)?', opt.accent || '#d97757');
+    opt.title = await ask('Card title?', opt.title || 'Claude Code usage');
+    const hide = await ask(`Sections to hide, comma-separated (${SECTIONS.join(', ')})?`, opt.hide || 'none');
+    opt.hide = hide === 'none' ? undefined : hide;
+  }
+  lookOptions(); // fail before publishing if an answer is invalid
 
   let every = opt.every;
   if (!every) {

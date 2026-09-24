@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-24
+
 ### Added
 - `--version` / `-v` flag.
 - Readable summary after a local render instead of the raw stats object.
@@ -35,6 +37,7 @@ All notable changes to this project are documented here. The format follows
 - Configurable refresh frequency; de-duplicated, honest stats.
 - English and French cards, light/dark/auto themes, guided `setup`.
 
-[Unreleased]: https://github.com/Clovis500c/ClaudeUsageChart/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/Clovis500c/ClaudeUsageChart/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Clovis500c/ClaudeUsageChart/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/Clovis500c/ClaudeUsageChart/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Clovis500c/ClaudeUsageChart/releases/tag/v0.5.0

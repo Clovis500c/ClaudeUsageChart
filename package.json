@@ -1,6 +1,6 @@
 {
   "name": "claude-stats",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Show your Claude Code stats card (sessions, prompts, tokens, models, tools, activity heatmap) in your GitHub README, auto-refreshed.",
   "author": "Clovis500c (https://github.com/Clovis500c)",
   "homepage": "https://github.com/Clovis500c/claude-stats#readme",

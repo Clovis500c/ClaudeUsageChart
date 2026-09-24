@@ -210,8 +210,6 @@ Book lengths use commonly cited English word counts, converted at ~1.3 tokens pe
 | History looks shorter than expected | Claude Code deletes old transcripts after `cleanupPeriodDays` (see `~/.claude/settings.json`). Raise it to keep a longer history. |
 | The refresh doesn't run | Run `claude-stats push` manually to see the error, then `claude-stats schedule --every 1d` to recreate the job. |
 
-Your options, published card and README snippet stay the same.
-
 ## Uninstall
 
 ```bash

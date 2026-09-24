@@ -37,9 +37,10 @@ const blobSha = (buf) => createHash('sha1').update(`blob ${buf.length}\0`).updat
 export async function putFile(token, repo, filePath, content, { branch, message } = {}) {
   const buf = Buffer.from(content);
   const q = branch ? `?ref=${encodeURIComponent(branch)}` : '';
-  const existing = await api(token, 'GET', `/repos/${repo}/contents/${filePath}${q}`);
+  const url = `/repos/${repo}/contents/${filePath.split('/').map(encodeURIComponent).join('/')}`;
+  const existing = await api(token, 'GET', `${url}${q}`);
   if (existing && existing.sha === blobSha(buf)) return false;
-  await api(token, 'PUT', `/repos/${repo}/contents/${filePath}`, {
+  await api(token, 'PUT', url, {
     message: message || `chore: update ${filePath}`,
     content: buf.toString('base64'),
     sha: existing?.sha,

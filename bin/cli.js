@@ -4,7 +4,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { createInterface } from 'node:readline/promises';
 import { loadEvents, aggregate, dailyCounts } from '../src/collect.js';
-import { renderCard, PALETTES, SECTIONS, TILES, DEFAULT_TILES, parseColor } from '../src/render.js';
+import { renderCard, PALETTES, SECTIONS, TILES, DEFAULT_TILES, parseColor, prettyModel, compact } from '../src/render.js';
 import { getToken, currentUser, putFile } from '../src/github.js';
 import { schedule, unschedule, isDue, markPushed, FREQUENCIES } from '../src/schedule.js';
 
@@ -38,6 +38,8 @@ Look
   --branch <name>          target branch (default: repo default)
   --out <dir>              local output folder for generate (default: .)
   --every <freq>           with push: skip the upload if the last one is more recent than <freq>
+  -v, --version            print the version
+  -h, --help               print this help
 `;
 
 const { positionals, values: opt } = parseArgs({
@@ -61,6 +63,7 @@ const { positionals, values: opt } = parseArgs({
     hide: { type: 'string' },
     transparent: { type: 'boolean', default: false },
     help: { type: 'boolean', short: 'h' },
+    version: { type: 'boolean', short: 'v' },
   },
 });
 
@@ -68,6 +71,13 @@ const list = (s) => (s ? s.split(',').map((x) => x.trim()).filter(Boolean) : [])
 
 // Validates look options up front so a typo fails loudly instead of silently.
 function lookOptions() {
+  const oneOf = (name, allowed) => {
+    if (!allowed.includes(opt[name])) throw new Error(`Invalid --${name} "${opt[name]}". Use one of: ${allowed.join(', ')}`);
+  };
+  oneOf('theme', ['dark', 'light', 'auto']);
+  oneOf('lang', ['en', 'fr']);
+  oneOf('range', ['all', '30d', '7d']);
+  if (opt.repo && !/^[\w.-]+\/[\w.-]+$/.test(opt.repo)) throw new Error(`Invalid --repo "${opt.repo}". Use the form owner/name`);
   if (!PALETTES[opt.palette]) throw new Error(`Unknown palette "${opt.palette}". Use one of: ${Object.keys(PALETTES).join(', ')}`);
   if (opt.accent && !parseColor(opt.accent)) throw new Error(`Invalid --accent "${opt.accent}". Use a hex color like #d97757`);
   const weeks = Number(opt.weeks);
@@ -191,8 +201,30 @@ async function setup() {
   console.log(`\nAdd this to your README.md:\n\n${snippet(opt.repo, opt.dir, opt.branch)}\n`);
 }
 
+// Short human-readable recap printed after a local render.
+function summary(stats) {
+  const n = (x) => x.toLocaleString('en-US');
+  const rows = [
+    ['Sessions', n(stats.sessions)],
+    ['Prompts', n(stats.prompts)],
+    ['Active days', `${n(stats.activeDays)} (longest streak: ${stats.longestStreak})`],
+    ['Tokens generated', compact(stats.tokens.output)],
+    ['Tokens processed', compact(stats.tokensTotal)],
+    ['Tool calls', n(stats.toolCalls)],
+    ['Favorite model', prettyModel(stats.favoriteModel)],
+  ];
+  const w = Math.max(...rows.map(([k]) => k.length));
+  return rows.map(([k, v]) => `  ${k.padEnd(w)}  ${v}`).join('\n');
+}
+
+function version() {
+  const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  return pkg.version;
+}
+
 async function main() {
   const cmd = positionals[0] || 'generate';
+  if (opt.version || cmd === 'version') return console.log(version());
   if (opt.help || cmd === 'help') return console.log(HELP);
   switch (cmd) {
     case 'generate': {
@@ -200,7 +232,7 @@ async function main() {
       fs.mkdirSync(opt.out, { recursive: true });
       for (const [name, svg] of Object.entries(files)) fs.writeFileSync(path.join(opt.out, name), svg);
       console.log(`✔ Wrote ${Object.keys(files).join(', ')} to ${path.resolve(opt.out)}`);
-      console.log(stats);
+      console.log(summary(stats));
       break;
     }
     case 'push': await push(); break;

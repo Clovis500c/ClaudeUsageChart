@@ -1,8 +1,55 @@
+<div align="center">
+
 # ClaudeUsageChart
 
-Your **Claude Code stats card** — sessions, prompts, tokens, models, tools and an activity heatmap — in your GitHub profile README, refreshed automatically.
+**Your Claude Code usage, as a live stats card for your GitHub profile.**
 
-<img src="examples/default.svg" alt="example card" />
+Sessions, prompts, tokens, models, top tools and an activity heatmap — computed locally from your Claude Code history, rendered as a self-contained SVG and refreshed automatically.
+
+[![CI](https://github.com/Clovis500c/ClaudeUsageChart/actions/workflows/ci.yml/badge.svg)](https://github.com/Clovis500c/ClaudeUsageChart/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Clovis500c/ClaudeUsageChart)](https://github.com/Clovis500c/ClaudeUsageChart/releases/latest)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+<img src="examples/default.svg" alt="Example ClaudeUsageChart card" width="520" />
+
+</div>
+
+---
+
+## Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Quick start](#quick-start)
+- [Commands](#commands)
+- [Customization](#customization)
+- [How it works](#how-it-works)
+- [Privacy](#privacy)
+- [How the numbers are computed](#how-the-numbers-are-computed)
+- [Troubleshooting](#troubleshooting)
+- [Uninstall](#uninstall)
+- [Contributing](#contributing)
+- [Disclaimer](#disclaimer) · [License](#license)
+
+## Features
+
+- **Complete overview** — sessions, prompts, active days, longest streak, generated tokens, tool calls, peak hour and favorite model.
+- **Activity heatmap** — prompts per day, from 8 to 52 weeks.
+- **Token and model breakdown** — what Claude wrote, what was added to context, what was re-read from cache, and the share of each model.
+- **Honest numbers** — transcripts are de-duplicated before counting (see [below](#how-the-numbers-are-computed)).
+- **Fully customizable** — dark, light or auto theme, 6 heatmap palettes, accent color, title, tiles and sections.
+- **Automatic refresh** — from every hour to once a week, only committing when something changed.
+- **Private by design** — only aggregated numbers leave your machine.
+- **Zero dependencies** — a single Node.js CLI, works on Windows, macOS and Linux.
+
+## Requirements
+
+- [Node.js](https://nodejs.org) **18 or later**
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with some local history in `~/.claude/projects`
+- A GitHub token, from either:
+  - the [GitHub CLI](https://cli.github.com) (`gh auth login`) — recommended, or
+  - a `GITHUB_TOKEN` environment variable with write access to the target repository (`contents: write`)
 
 ## Quick start
 
@@ -13,34 +60,69 @@ npm i -g https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download
 claude-usage-chart setup
 ```
 
-It will:
-1. read your local Claude Code history (`~/.claude/projects`),
-2. render the card (dark by default),
-3. upload it to your profile repo (`<you>/<you>` by default),
-4. ask how often it should refresh (every hour → once a week, or never),
-5. print the snippet to paste in your `README.md`:
+Or run it without installing anything:
+
+```bash
+npx -y --package=https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download/claude-usage-chart.tgz claude-usage-chart setup
+```
+
+The setup will:
+
+1. read your local Claude Code history (`~/.claude/projects`);
+2. render the card (dark theme by default);
+3. upload it to your profile repository (`<you>/<you>` by default);
+4. ask how often it should refresh (every hour to once a week, or never);
+5. print the snippet to paste into your `README.md`:
 
 ```html
-<img alt="Claude stats" src="https://raw.githubusercontent.com/<you>/<you>/HEAD/claude-stats/claude-stats.svg" />
+<img alt="Claude Code usage" src="https://raw.githubusercontent.com/<you>/<you>/HEAD/claude-stats/claude-stats.svg" />
 ```
+
+> [!TIP]
+> Preview the card locally before publishing anything:
+> `claude-usage-chart --palette green --out preview` writes `preview/claude-stats.svg`.
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `claude-usage-chart setup` | Guided setup: publish, choose the refresh frequency, get the snippet |
+| `claude-usage-chart` | Write `claude-stats.svg` to the current folder (or `--out <dir>`) |
+| `claude-usage-chart push` | Render and upload; only commits when the card changed |
+| `claude-usage-chart schedule --every <freq>` | Set the refresh frequency: `1h`, `6h`, `12h`, `1d`, `7d` |
+| `claude-usage-chart unschedule` | Stop the automatic refresh |
+| `claude-usage-chart --help` | Show every option |
+| `claude-usage-chart --version` | Show the installed version |
 
 ## Customization
 
-Every part of the card can be tuned. `setup` asks for the main ones, or pass them as options (they are kept for the automatic refresh).
+`setup` asks for the main options; every option can also be passed on the command line. Options are remembered by the automatic refresh.
 
-| Option | What it does | Default |
+### Appearance
+
+| Option | Description | Default |
 |---|---|---|
-| `--theme dark|light|auto` | Card theme; `auto` follows the visitor's GitHub theme | `dark` |
+| `--theme <dark\|light\|auto>` | Card theme; `auto` follows the visitor's GitHub theme | `dark` |
 | `--palette <name>` | Heatmap colors: `blue`, `green`, `orange`, `purple`, `pink`, `gray` | `blue` |
-| `--accent <hex>` | Color of the Claude logo and the bars | `#d97757` |
+| `--accent <hex>` | Color of the Claude logo and of the bars | `#d97757` |
 | `--title <text>` | Card title | `Claude Code usage` |
-| `--weeks <8-52>` | Heatmap length | `26` |
-| `--tiles <list>` | Which stat tiles to show, in order: `sessions`, `prompts`, `activeDays`, `streak`, `generated`, `toolCalls`, `peakHour`, `favorite`, `responses`, `processed` | first 8 |
+| `--weeks <8-52>` | Number of weeks in the heatmap | `26` |
+| `--tiles <list>` | Stat tiles to show, in order (see below) | first 8 |
 | `--hide <list>` | Sections to leave out: `header`, `tiles`, `heatmap`, `book`, `tokens`, `models`, `tools` | none |
 | `--transparent` | No card background | off |
-| `--lang en|fr` | Language | `en` |
-| `--range all|30d|7d` | Period for the numbers | `all` |
-| `--name <user>` | Name in the header | repo owner |
+
+Available tiles: `sessions`, `prompts`, `activeDays`, `streak`, `generated`, `toolCalls`, `peakHour`, `favorite`, `responses`, `processed`.
+
+### Content and publishing
+
+| Option | Description | Default |
+|---|---|---|
+| `--lang <en\|fr>` | Card language | `en` |
+| `--range <all\|30d\|7d>` | Period covered by the numbers (the heatmap always shows its full length) | `all` |
+| `--name <user>` | Name shown in the header | repository owner |
+| `--repo <owner/name>` | Target repository | `<you>/<you>` |
+| `--dir <path>` | Folder inside the repository | `claude-stats` |
+| `--branch <name>` | Target branch | repository default |
 
 ### Examples
 
@@ -50,36 +132,38 @@ Every part of the card can be tuned. `setup` asks for the main ones, or pass the
 | <img src="examples/light-pink.svg" width="400" /><br>`--theme light --palette pink --accent "#cc4589" --hide tools` | <img src="examples/stats-only.svg" width="400" /><br>`--tiles prompts,generated,streak,favorite --hide heatmap,tools --palette orange` |
 | <img src="examples/heatmap-only.svg" width="400" /><br>`--hide header,tiles,book,tokens,models,tools --palette gray --transparent` | |
 
-Try a look locally before publishing: `claude-usage-chart --palette green --out preview` writes `preview/claude-stats.svg`.
+### Light and dark mode
 
-## Commands
+With `--theme auto`, two files are published (`claude-stats.svg` and `claude-stats-light.svg`) and `setup` prints a `<picture>` snippet so GitHub shows the one matching each visitor's theme.
 
-| Command | What it does |
-|---|---|
-| `claude-usage-chart setup` | Guided setup (publish + refresh frequency + snippet) |
-| `claude-usage-chart` | Write `claude-stats.svg` in the current folder |
-| `claude-usage-chart push` | Render and upload (only commits when something changed) |
-| `claude-usage-chart schedule --every 1d` | Change the refresh frequency: `1h`, `6h`, `12h`, `1d`, `7d` |
-| `claude-usage-chart unschedule` | Stop the automatic refresh |
+## How it works
 
-### How the automatic refresh works
+```
+~/.claude/projects/**/*.jsonl ──► aggregate (local) ──► SVG card ──► GitHub contents API ──► your README
+```
 
-A job (Windows Task Scheduler, or cron on macOS/Linux) wakes up every hour and only uploads once the chosen interval has passed since the last upload. If your computer was off when a refresh was due, it happens within an hour of it being back on. Nothing is uploaded when the numbers haven't changed.
+### Why not a GitHub Action?
 
-## Why not a GitHub Action like the snake?
+Tools like the contribution snake read data that already lives on GitHub. Your Claude Code usage only lives **on your computer** — there is no public API for personal (Pro/Max) usage. The refresh therefore runs locally and pushes the SVG; the card updates whenever your machine is on.
 
-The contribution snake reads data that lives on GitHub. Your Claude usage only lives **on your computer** — Anthropic has no public API for personal (Pro/Max) usage. So the refresh runs locally (Windows Task Scheduler, or cron on macOS/Linux) and pushes the SVG; the card updates whenever your machine is on.
+### Automatic refresh
+
+A job (Task Scheduler on Windows, cron on macOS and Linux) wakes up every hour and only uploads once the chosen interval has elapsed since the last successful upload. If your computer was off when a refresh was due, it happens within an hour of being back on. Nothing is committed when the numbers haven't changed.
 
 ## Privacy
 
-Only aggregated numbers end up in the SVG: counts, token totals, per-day prompt counts, model names and the names of your most-used tools. No prompts, code, file names or project names leave your machine. Use `--hide-tools` to leave tool names off the card.
+Only aggregated numbers end up in the SVG: counts, token totals, per-day prompt counts, model names and the names of your most-used tools. **No prompts, code, file names or project names ever leave your machine.** Use `--hide tools` to leave tool names off the card.
+
+The GitHub token is read from `gh` or `GITHUB_TOKEN` at run time and is never stored by this tool. The only file it writes outside the output folder is `~/.claude-usage-chart.json`, which records the time of the last upload per repository.
 
 ## How the numbers are computed
 
 Claude Code transcripts (`~/.claude/projects/**/*.jsonl`) contain a lot of repetition, so they are de-duplicated before counting:
+
 - one API response is written as several lines (one per content block), each repeating the same token usage → each response is counted **once**;
-- resumed sessions copy earlier messages into a new file → each message id is counted **once**;
-- most "user" lines are tool results or system notices → only messages you actually typed count as **prompts**.
+- resumed sessions copy earlier messages into a new file → each message is counted **once**;
+- most "user" lines are tool results or system notices → only messages you actually typed count as **prompts**;
+- subagent traffic is excluded.
 
 | Stat | Definition |
 |---|---|
@@ -87,20 +171,23 @@ Claude Code transcripts (`~/.claude/projects/**/*.jsonl`) contain a lot of repet
 | Prompts | Messages you typed (no tool results, no system messages) |
 | Active days · Longest streak | Days with at least one prompt or response · most consecutive such days |
 | Tokens generated | Output tokens: everything Claude wrote (text, code, tool calls, thinking) |
-| Tool calls · Top tools | Tool uses Claude made (each counted once) · the most frequent ones |
+| Tool calls · Top tools | Tool uses by Claude, each counted once · the most frequent ones |
 | Peak hour | Hour of the day with the most prompts |
 | Favorite model | Model that generated the most output tokens |
-| Heatmap | Prompts per day over the last 26 weeks |
-| **Tokens** bar | *Written by Claude* = output · *Added to context* = input + cache writes (files read, command results…) · *Re-read from cache* = cache reads: on every step Claude re-reads the whole conversation, which is why this part is by far the biggest |
+| Heatmap | Prompts per day over the last `--weeks` weeks |
+| **Tokens** bar | *Written by Claude* = output · *Added to context* = input + cache writes (files read, command results…) · *Re-read from cache* = cache reads — Claude re-reads the whole conversation at every step, which is why this part is by far the largest |
 | **Models** bar | Share of output tokens per model |
-| Book line | Output tokens compared with a book's length (see below) |
+| Book line | Output tokens compared with the length of a well-known book |
 
-### The book comparison
+Numbers can differ from the Claude app's stats card, which sums the repeated lines.
 
-Book lengths use commonly cited English word counts, converted at ~1.3 tokens per word, so it's an estimate (output also contains code and tool calls). The card picks the longest book Claude's output fits into at least 10 times, so the number stays readable:
+<details>
+<summary><strong>The book comparison</strong></summary>
+
+Book lengths use commonly cited English word counts, converted at ~1.3 tokens per word, so the comparison is an estimate (output also contains code and tool calls). The card picks the longest book Claude's output fits into at least 10 times, so the number stays readable.
 
 | Book | Words |
-|---|---|
+|---|---:|
 | The Great Gatsby | 47,094 |
 | Harry Potter and the Philosopher's Stone | 76,944 |
 | The Hobbit | 95,356 |
@@ -109,13 +196,59 @@ Book lengths use commonly cited English word counts, converted at ~1.3 tokens pe
 | The King James Bible | 783,137 |
 | In Search of Lost Time | 1,267,069 |
 
-Subagent traffic is excluded. Numbers can differ from the Claude app's stats card, which sums the repeated lines.
+</details>
 
-Note: stats only cover the transcripts still on disk. Claude Code can clean up old transcripts (see the `cleanupPeriodDays` setting in `~/.claude/settings.json`); raise it to keep a longer history.
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| `No Claude Code transcripts found` | Use Claude Code at least once. If you set `CLAUDE_CONFIG_DIR`, the tool reads `$CLAUDE_CONFIG_DIR/projects` instead of `~/.claude/projects`. |
+| `No GitHub token` | Run `gh auth login`, or set `GITHUB_TOKEN`. |
+| `GitHub PUT … → 403` / `404` | The token can't write to the repository: check `--repo` and that the token has `contents: write` access. |
+| The card on GitHub looks outdated | GitHub caches images for a few minutes. Check that the SVG in the repository was updated, then reload. |
+| History looks shorter than expected | Claude Code deletes old transcripts after `cleanupPeriodDays` (see `~/.claude/settings.json`). Raise it to keep a longer history. |
+| The refresh doesn't run | Run `claude-usage-chart push` manually to see the error, then `claude-usage-chart schedule --every 1d` to recreate the job. |
+
+## Uninstall
+
+```bash
+claude-usage-chart unschedule
+npm rm -g claude-usage-chart
+rm ~/.claude-usage-chart.json   # optional: last-upload bookkeeping
+```
+
+Then remove the `claude-stats/` folder and the snippet from your profile repository.
+
+## Contributing
+
+Issues and pull requests are welcome.
+
+```bash
+git clone https://github.com/Clovis500c/ClaudeUsageChart.git
+cd ClaudeUsageChart
+npm test                 # unit tests (node:test, no dependencies)
+npm run preview          # render your own card to preview/claude-stats.svg
+```
+
+| Path | Role |
+|---|---|
+| `bin/cli.js` | Command-line interface, option parsing and guided setup |
+| `src/collect.js` | Reads and de-duplicates transcripts, computes the stats |
+| `src/render.js` | Renders the SVG card (themes, palettes, translations) |
+| `src/books.js` | Book lengths for the output comparison |
+| `src/github.js` | Uploads through the GitHub contents API |
+| `src/schedule.js` | Automatic refresh (Task Scheduler / cron) |
+| `test/` | Unit tests |
+
+### Releasing
+
+1. Bump `version` in `package.json` and move the *Unreleased* notes in [`CHANGELOG.md`](CHANGELOG.md) under the new version.
+2. Tag and push: `git tag v0.6.0 && git push origin v0.6.0`.
+3. The [release workflow](.github/workflows/release.yml) runs the tests, packs `claude-usage-chart.tgz` and publishes the GitHub release.
 
 ## Credits
 
-Created and maintained by [**Clovis500c**](https://github.com/Clovis500c). If you use it, a star on the repo is appreciated ⭐
+Created and maintained by [**Clovis500c**](https://github.com/Clovis500c). If you find it useful, a ⭐ on the repository is appreciated.
 
 ## Disclaimer
 
@@ -123,4 +256,4 @@ This is a community project, not affiliated with or endorsed by Anthropic. Claud
 
 ## License
 
-MIT © Clovis500c
+[MIT](LICENSE) © Clovis500c

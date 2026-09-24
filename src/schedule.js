@@ -48,15 +48,23 @@ export function markPushed(repo) {
 
 // ---- OS scheduler ---------------------------------------------------------
 
+// Latest release tarball; the package is distributed through GitHub releases.
+export const RELEASE_TGZ = 'https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download/claude-usage-chart.tgz';
+
 // When launched through npx the script lives in a cache that can be wiped,
-// so the job calls npx again instead of that path.
-function argv(args) {
-  const viaNpx = /[\\/]_npx[\\/]/.test(CLI);
-  if (!viaNpx) return [process.execPath, CLI, ...args];
-  return [...(process.platform === 'win32' ? ['cmd', '/c'] : []), 'npx', '-y', 'claude-usage-chart@latest', ...args];
+// so the job calls npx again (on the latest release) instead of that path.
+export function argv(args, cli = CLI) {
+  const viaNpx = /[\\/]_npx[\\/]/.test(cli);
+  if (!viaNpx) return [process.execPath, cli, ...args];
+  return [...(process.platform === 'win32' ? ['cmd', '/c'] : []), 'npx', '-y', `--package=${RELEASE_TGZ}`, 'claude-usage-chart', ...args];
 }
 
-const quote = (a) => (/[\s"]/.test(a) ? `"${a}"` : a);
+// Windows command line: wrap in double quotes, doubling any inner quote.
+const winQuote = (a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '""')}"` : a);
+// POSIX shell inside a crontab: single quotes stop $, ` and \ from expanding,
+// and % must be escaped because cron turns a bare % into a newline.
+export const cronQuote = (a) =>
+  (/^[\w@%+=:,./-]+$/.test(a) ? a : `'${a.replace(/'/g, `'\\''`)}'`).replace(/%/g, '\\%');
 const xmlEsc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function localIso(d) {
@@ -91,7 +99,7 @@ export function taskXml(args) {
   <Actions Context="Author">
     <Exec>
       <Command>conhost.exe</Command>
-      <Arguments>${xmlEsc(['--headless', cmd, ...rest].map(quote).join(' '))}</Arguments>
+      <Arguments>${xmlEsc(['--headless', cmd, ...rest].map(winQuote).join(' '))}</Arguments>
     </Exec>
   </Actions>
 </Task>
@@ -122,7 +130,7 @@ export function schedule(args, every) {
     return `Windows task "${TASK}", ${FREQUENCIES[every].label}`;
   }
   const lines = readCrontab().split('\n').filter((l) => l && !l.includes(TAG));
-  lines.push(`0 * * * * ${argv(jobArgs).map(quote).join(' ')} >/dev/null 2>&1 ${TAG}`);
+  lines.push(`0 * * * * ${argv(jobArgs).map(cronQuote).join(' ')} >/dev/null 2>&1 ${TAG}`);
   run('crontab', ['-'], lines.join('\n') + '\n');
   return `crontab entry, ${FREQUENCIES[every].label}`;
 }

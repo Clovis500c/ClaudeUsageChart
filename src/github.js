@@ -18,7 +18,7 @@ async function api(token, method, url, body) {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/vnd.github+json',
-      'User-Agent': 'claude-usage-chart',
+      'User-Agent': 'claude-stats',
     },
     body: body && JSON.stringify(body),
   });

@@ -8,14 +8,14 @@ import { renderCard, PALETTES, SECTIONS, TILES, DEFAULT_TILES, parseColor, prett
 import { getToken, currentUser, putFile } from '../src/github.js';
 import { schedule, unschedule, isDue, markPushed, FREQUENCIES } from '../src/schedule.js';
 
-const HELP = `claude-usage-chart — your Claude Code usage card, for your GitHub README
+const HELP = `claude-stats — your Claude Code usage card, for your GitHub README
 
 Usage
-  claude-usage-chart setup               guided setup: publish to your profile + automatic refresh
-  claude-usage-chart [generate]          write the SVG(s) locally
-  claude-usage-chart push                render and upload to GitHub
-  claude-usage-chart schedule --every X  refresh automatically (1h, 6h, 12h, 1d, 7d)
-  claude-usage-chart unschedule          stop the automatic refresh
+  claude-stats setup               guided setup: publish to your profile + automatic refresh
+  claude-stats [generate]          write the SVG(s) locally
+  claude-stats push                render and upload to GitHub
+  claude-stats schedule --every X  refresh automatically (1h, 6h, 12h, 1d, 7d)
+  claude-stats unschedule          stop the automatic refresh
 
 Options
   --repo <owner/name>      target repo (default: <you>/<you>, your profile repo)
@@ -155,7 +155,7 @@ const MENU = [
   ['12h', 'Every 12 hours'],
   ['1d', 'Once a day (recommended)'],
   ['7d', 'Once a week'],
-  ['off', 'Never, I\'ll run "claude-usage-chart push" myself'],
+  ['off', 'Never, I\'ll run "claude-stats push" myself'],
 ];
 
 async function setup() {
@@ -193,7 +193,7 @@ async function setup() {
   await push();
   if (every === 'off') {
     unschedule();
-    console.log('✔ No automatic refresh. Run "claude-usage-chart push" whenever you want to update the card.');
+    console.log('✔ No automatic refresh. Run "claude-stats push" whenever you want to update the card.');
   } else {
     console.log(`✔ Scheduled: ${schedule(jobArgs(), every)}`);
     console.log('  If the computer is off at that time, it updates within an hour of being back on.');

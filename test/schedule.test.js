@@ -28,12 +28,12 @@ test('frequencies are increasing', () => {
 });
 
 test('the job runs the installed CLI directly', () => {
-  assert.deepEqual(argv(['push'], '/usr/lib/node_modules/claude-usage-chart/bin/cli.js'),
-    [process.execPath, '/usr/lib/node_modules/claude-usage-chart/bin/cli.js', 'push']);
+  assert.deepEqual(argv(['push'], '/usr/lib/node_modules/claude-stats/bin/cli.js'),
+    [process.execPath, '/usr/lib/node_modules/claude-stats/bin/cli.js', 'push']);
 });
 
 test('an npx run schedules the latest release, not a cache path', () => {
-  const a = argv(['push'], '/home/me/.npm/_npx/abc/node_modules/claude-usage-chart/bin/cli.js');
+  const a = argv(['push'], '/home/me/.npm/_npx/abc/node_modules/claude-stats/bin/cli.js');
   assert.ok(a.includes(`--package=${RELEASE_TGZ}`));
-  assert.deepEqual(a.slice(-2), ['claude-usage-chart', 'push']);
+  assert.deepEqual(a.slice(-2), ['claude-stats', 'push']);
 });

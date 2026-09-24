@@ -1,17 +1,17 @@
 <div align="center">
 
-# ClaudeUsageChart
+# Claude Stats
 
 **Your Claude Code usage, as a live stats card for your GitHub profile.**
 
 Sessions, prompts, tokens, models, top tools and an activity heatmap — computed locally from your Claude Code history, rendered as a self-contained SVG and refreshed automatically.
 
-[![CI](https://github.com/Clovis500c/ClaudeUsageChart/actions/workflows/ci.yml/badge.svg)](https://github.com/Clovis500c/ClaudeUsageChart/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Clovis500c/ClaudeUsageChart)](https://github.com/Clovis500c/ClaudeUsageChart/releases/latest)
+[![CI](https://github.com/Clovis500c/claude-stats/actions/workflows/ci.yml/badge.svg)](https://github.com/Clovis500c/claude-stats/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Clovis500c/claude-stats)](https://github.com/Clovis500c/claude-stats/releases/latest)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-<img src="examples/default.svg" alt="Example ClaudeUsageChart card" width="520" />
+<img src="examples/default.svg" alt="Example Claude Stats card" width="520" />
 
 </div>
 
@@ -28,6 +28,7 @@ Sessions, prompts, tokens, models, top tools and an activity heatmap — compute
 - [Privacy](#privacy)
 - [How the numbers are computed](#how-the-numbers-are-computed)
 - [Troubleshooting](#troubleshooting)
+- [Upgrading from `claude-usage-chart`](#upgrading-from-claude-usage-chart)
 - [Uninstall](#uninstall)
 - [Contributing](#contributing)
 - [Disclaimer](#disclaimer) · [License](#license)
@@ -56,14 +57,14 @@ Sessions, prompts, tokens, models, top tools and an activity heatmap — compute
 Install the latest release, then run the guided setup:
 
 ```bash
-npm i -g https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download/claude-usage-chart.tgz
-claude-usage-chart setup
+npm i -g https://github.com/Clovis500c/claude-stats/releases/latest/download/claude-stats.tgz
+claude-stats setup
 ```
 
 Or run it without installing anything:
 
 ```bash
-npx -y --package=https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download/claude-usage-chart.tgz claude-usage-chart setup
+npx -y --package=https://github.com/Clovis500c/claude-stats/releases/latest/download/claude-stats.tgz claude-stats setup
 ```
 
 The setup will:
@@ -80,19 +81,19 @@ The setup will:
 
 > [!TIP]
 > Preview the card locally before publishing anything:
-> `claude-usage-chart --palette green --out preview` writes `preview/claude-stats.svg`.
+> `claude-stats --palette green --out preview` writes `preview/claude-stats.svg`.
 
 ## Commands
 
 | Command | Description |
 |---|---|
-| `claude-usage-chart setup` | Guided setup: publish, choose the refresh frequency, get the snippet |
-| `claude-usage-chart` | Write `claude-stats.svg` to the current folder (or `--out <dir>`) |
-| `claude-usage-chart push` | Render and upload; only commits when the card changed |
-| `claude-usage-chart schedule --every <freq>` | Set the refresh frequency: `1h`, `6h`, `12h`, `1d`, `7d` |
-| `claude-usage-chart unschedule` | Stop the automatic refresh |
-| `claude-usage-chart --help` | Show every option |
-| `claude-usage-chart --version` | Show the installed version |
+| `claude-stats setup` | Guided setup: publish, choose the refresh frequency, get the snippet |
+| `claude-stats` | Write `claude-stats.svg` to the current folder (or `--out <dir>`) |
+| `claude-stats push` | Render and upload; only commits when the card changed |
+| `claude-stats schedule --every <freq>` | Set the refresh frequency: `1h`, `6h`, `12h`, `1d`, `7d` |
+| `claude-stats unschedule` | Stop the automatic refresh |
+| `claude-stats --help` | Show every option |
+| `claude-stats --version` | Show the installed version |
 
 ## Customization
 
@@ -207,13 +208,25 @@ Book lengths use commonly cited English word counts, converted at ~1.3 tokens pe
 | `GitHub PUT … → 403` / `404` | The token can't write to the repository: check `--repo` and that the token has `contents: write` access. |
 | The card on GitHub looks outdated | GitHub caches images for a few minutes. Check that the SVG in the repository was updated, then reload. |
 | History looks shorter than expected | Claude Code deletes old transcripts after `cleanupPeriodDays` (see `~/.claude/settings.json`). Raise it to keep a longer history. |
-| The refresh doesn't run | Run `claude-usage-chart push` manually to see the error, then `claude-usage-chart schedule --every 1d` to recreate the job. |
+| The refresh doesn't run | Run `claude-stats push` manually to see the error, then `claude-stats schedule --every 1d` to recreate the job. |
+
+## Upgrading from `claude-usage-chart`
+
+The project was renamed from *ClaudeUsageChart* to *Claude Stats*. Old links redirect and the `claude-usage-chart` command still works as an alias, but to switch to the new package:
+
+```bash
+npm rm -g claude-usage-chart
+npm i -g https://github.com/Clovis500c/claude-stats/releases/latest/download/claude-stats.tgz
+claude-stats schedule --every 1d   # points the automatic refresh at the new install
+```
+
+Your options, published card and README snippet stay the same.
 
 ## Uninstall
 
 ```bash
-claude-usage-chart unschedule
-npm rm -g claude-usage-chart
+claude-stats unschedule
+npm rm -g claude-stats
 rm ~/.claude-usage-chart.json   # optional: last-upload bookkeeping
 ```
 
@@ -224,8 +237,8 @@ Then remove the `claude-stats/` folder and the snippet from your profile reposit
 Issues and pull requests are welcome.
 
 ```bash
-git clone https://github.com/Clovis500c/ClaudeUsageChart.git
-cd ClaudeUsageChart
+git clone https://github.com/Clovis500c/claude-stats.git
+cd claude-stats
 npm test                 # unit tests (node:test, no dependencies)
 npm run preview          # render your own card to preview/claude-stats.svg
 ```
@@ -244,7 +257,7 @@ npm run preview          # render your own card to preview/claude-stats.svg
 
 1. Bump `version` in `package.json` and move the *Unreleased* notes in [`CHANGELOG.md`](CHANGELOG.md) under the new version.
 2. Tag and push (`git tag v0.6.0 && git push origin v0.6.0`), or run the **Release** workflow from the Actions tab, which tags the current commit for you.
-3. The [release workflow](.github/workflows/release.yml) runs the tests, packs `claude-usage-chart.tgz` and publishes the GitHub release.
+3. The [release workflow](.github/workflows/release.yml) runs the tests, packs `claude-stats.tgz` and publishes the GitHub release.
 
 ## Credits
 

@@ -1,6 +1,8 @@
 name: Release
 
-# Publishes a GitHub release with the installable claude-usage-chart.tgz.
+# Publishes a GitHub release with the installable claude-stats.tgz, plus a copy
+# under the project's former name (claude-usage-chart.tgz) so older installs
+# and scheduled jobs that download that file keep working.
 # Either push a tag like v0.6.0 (matching package.json), or run this workflow
 # from the Actions tab: it then tags the current commit with the
 # package.json version.
@@ -37,11 +39,13 @@ jobs:
           echo "name=$tag" >> "$GITHUB_OUTPUT"
       - run: npm test
       - name: Pack
-        run: mv "$(npm pack --silent)" claude-usage-chart.tgz
+        run: |
+          mv "$(npm pack --silent)" claude-stats.tgz
+          cp claude-stats.tgz claude-usage-chart.tgz
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.name }}
         run: |
           notes=$(awk -v v="${TAG#v}" '$0 ~ "^## \\[?"v"\\]?" {f=1; next} /^## / {f=0} f' CHANGELOG.md)
-          gh release create "$TAG" claude-usage-chart.tgz --target "$GITHUB_SHA" --title "$TAG" --notes "${notes:-See CHANGELOG.md}"
+          gh release create "$TAG" claude-stats.tgz claude-usage-chart.tgz --target "$GITHUB_SHA" --title "$TAG" --notes "${notes:-See CHANGELOG.md}"

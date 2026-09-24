@@ -9,6 +9,8 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+// The job names and state file keep the project's former name, so installs
+// made before the rename are found and replaced instead of duplicated.
 const TASK = 'ClaudeUsageChart';
 const TAG = '# claude-usage-chart';
 const CLI = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
@@ -49,14 +51,14 @@ export function markPushed(repo) {
 // ---- OS scheduler ---------------------------------------------------------
 
 // Latest release tarball; the package is distributed through GitHub releases.
-export const RELEASE_TGZ = 'https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download/claude-usage-chart.tgz';
+export const RELEASE_TGZ = 'https://github.com/Clovis500c/claude-stats/releases/latest/download/claude-stats.tgz';
 
 // When launched through npx the script lives in a cache that can be wiped,
 // so the job calls npx again (on the latest release) instead of that path.
 export function argv(args, cli = CLI) {
   const viaNpx = /[\\/]_npx[\\/]/.test(cli);
   if (!viaNpx) return [process.execPath, cli, ...args];
-  return [...(process.platform === 'win32' ? ['cmd', '/c'] : []), 'npx', '-y', `--package=${RELEASE_TGZ}`, 'claude-usage-chart', ...args];
+  return [...(process.platform === 'win32' ? ['cmd', '/c'] : []), 'npx', '-y', `--package=${RELEASE_TGZ}`, 'claude-stats', ...args];
 }
 
 // Windows command line: wrap in double quotes, doubling any inner quote.
@@ -78,7 +80,7 @@ export function taskXml(args) {
   // conhost --headless keeps a console window from flashing up every hour
   const xml = `<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
-  <RegistrationInfo><Description>Refreshes the ClaudeUsageChart card on GitHub</Description></RegistrationInfo>
+  <RegistrationInfo><Description>Refreshes the Claude Stats card on GitHub</Description></RegistrationInfo>
   <Triggers>
     <TimeTrigger>
       <StartBoundary>${localIso(start)}</StartBoundary>

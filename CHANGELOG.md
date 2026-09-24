@@ -7,6 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Changed
+- Renamed the project to **Claude Stats**: repository `claude-stats`, package and command `claude-stats`, release file `claude-stats.tgz`. The `claude-usage-chart` command and release file remain available so existing installs and scheduled refreshes keep working.
 - The release workflow can also be run by hand from the Actions tab; it then tags the commit with the `package.json` version.
 
 ## [0.6.0] - 2026-09-24
@@ -40,7 +41,7 @@ All notable changes to this project are documented here. The format follows
 - Configurable refresh frequency; de-duplicated, honest stats.
 - English and French cards, light/dark/auto themes, guided `setup`.
 
-[Unreleased]: https://github.com/Clovis500c/ClaudeUsageChart/compare/v0.6.0...HEAD
-[0.6.0]: https://github.com/Clovis500c/ClaudeUsageChart/compare/v0.5.1...v0.6.0
-[0.5.1]: https://github.com/Clovis500c/ClaudeUsageChart/compare/v0.5.0...v0.5.1
-[0.5.0]: https://github.com/Clovis500c/ClaudeUsageChart/releases/tag/v0.5.0
+[Unreleased]: https://github.com/Clovis500c/claude-stats/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Clovis500c/claude-stats/compare/v0.5.1...v0.6.0
+[0.5.1]: https://github.com/Clovis500c/claude-stats/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/Clovis500c/claude-stats/releases/tag/v0.5.0

@@ -68,6 +68,13 @@ const list = (s) => (s ? s.split(',').map((x) => x.trim()).filter(Boolean) : [])
 
 // Validates look options up front so a typo fails loudly instead of silently.
 function lookOptions() {
+  const oneOf = (name, allowed) => {
+    if (!allowed.includes(opt[name])) throw new Error(`Invalid --${name} "${opt[name]}". Use one of: ${allowed.join(', ')}`);
+  };
+  oneOf('theme', ['dark', 'light', 'auto']);
+  oneOf('lang', ['en', 'fr']);
+  oneOf('range', ['all', '30d', '7d']);
+  if (opt.repo && !/^[\w.-]+\/[\w.-]+$/.test(opt.repo)) throw new Error(`Invalid --repo "${opt.repo}". Use the form owner/name`);
   if (!PALETTES[opt.palette]) throw new Error(`Unknown palette "${opt.palette}". Use one of: ${Object.keys(PALETTES).join(', ')}`);
   if (opt.accent && !parseColor(opt.accent)) throw new Error(`Invalid --accent "${opt.accent}". Use a hex color like #d97757`);
   const weeks = Number(opt.weeks);

@@ -60,6 +60,12 @@ npm i -g https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download
 claude-usage-chart setup
 ```
 
+Or run it without installing anything:
+
+```bash
+npx -y --package=https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download/claude-usage-chart.tgz claude-usage-chart setup
+```
+
 The setup will:
 
 1. read your local Claude Code history (`~/.claude/projects`);
@@ -86,6 +92,7 @@ The setup will:
 | `claude-usage-chart schedule --every <freq>` | Set the refresh frequency: `1h`, `6h`, `12h`, `1d`, `7d` |
 | `claude-usage-chart unschedule` | Stop the automatic refresh |
 | `claude-usage-chart --help` | Show every option |
+| `claude-usage-chart --version` | Show the installed version |
 
 ## Customization
 
@@ -231,6 +238,13 @@ npm run preview          # render your own card to preview/claude-stats.svg
 | `src/books.js` | Book lengths for the output comparison |
 | `src/github.js` | Uploads through the GitHub contents API |
 | `src/schedule.js` | Automatic refresh (Task Scheduler / cron) |
+| `test/` | Unit tests |
+
+### Releasing
+
+1. Bump `version` in `package.json` and move the *Unreleased* notes in [`CHANGELOG.md`](CHANGELOG.md) under the new version.
+2. Tag and push: `git tag v0.6.0 && git push origin v0.6.0`.
+3. The [release workflow](.github/workflows/release.yml) runs the tests, packs `claude-usage-chart.tgz` and publishes the GitHub release.
 
 ## Credits
 

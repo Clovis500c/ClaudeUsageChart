@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cronQuote, taskXml, FREQUENCIES } from '../src/schedule.js';
+import { cronQuote, taskXml, argv, RELEASE_TGZ, FREQUENCIES } from '../src/schedule.js';
 
 test('cronQuote leaves plain arguments alone', () => {
   assert.equal(cronQuote('push'), 'push');
@@ -25,4 +25,15 @@ test('Windows task XML escapes the arguments', () => {
 test('frequencies are increasing', () => {
   const ms = Object.values(FREQUENCIES).map((f) => f.ms);
   assert.deepEqual(ms, [...ms].sort((a, b) => a - b));
+});
+
+test('the job runs the installed CLI directly', () => {
+  assert.deepEqual(argv(['push'], '/usr/lib/node_modules/claude-usage-chart/bin/cli.js'),
+    [process.execPath, '/usr/lib/node_modules/claude-usage-chart/bin/cli.js', 'push']);
+});
+
+test('an npx run schedules the latest release, not a cache path', () => {
+  const a = argv(['push'], '/home/me/.npm/_npx/abc/node_modules/claude-usage-chart/bin/cli.js');
+  assert.ok(a.includes(`--package=${RELEASE_TGZ}`));
+  assert.deepEqual(a.slice(-2), ['claude-usage-chart', 'push']);
 });

@@ -48,12 +48,15 @@ export function markPushed(repo) {
 
 // ---- OS scheduler ---------------------------------------------------------
 
+// Latest release tarball; the package is distributed through GitHub releases.
+export const RELEASE_TGZ = 'https://github.com/Clovis500c/ClaudeUsageChart/releases/latest/download/claude-usage-chart.tgz';
+
 // When launched through npx the script lives in a cache that can be wiped,
-// so the job calls npx again instead of that path.
-function argv(args) {
-  const viaNpx = /[\\/]_npx[\\/]/.test(CLI);
-  if (!viaNpx) return [process.execPath, CLI, ...args];
-  return [...(process.platform === 'win32' ? ['cmd', '/c'] : []), 'npx', '-y', 'claude-usage-chart@latest', ...args];
+// so the job calls npx again (on the latest release) instead of that path.
+export function argv(args, cli = CLI) {
+  const viaNpx = /[\\/]_npx[\\/]/.test(cli);
+  if (!viaNpx) return [process.execPath, cli, ...args];
+  return [...(process.platform === 'win32' ? ['cmd', '/c'] : []), 'npx', '-y', `--package=${RELEASE_TGZ}`, 'claude-usage-chart', ...args];
 }
 
 // Windows command line: wrap in double quotes, doubling any inner quote.

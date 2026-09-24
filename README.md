@@ -210,16 +210,6 @@ Book lengths use commonly cited English word counts, converted at ~1.3 tokens pe
 | History looks shorter than expected | Claude Code deletes old transcripts after `cleanupPeriodDays` (see `~/.claude/settings.json`). Raise it to keep a longer history. |
 | The refresh doesn't run | Run `claude-stats push` manually to see the error, then `claude-stats schedule --every 1d` to recreate the job. |
 
-## Upgrading from `claude-usage-chart`
-
-The project was renamed from *ClaudeUsageChart* to *Claude Stats*. Old links redirect and the `claude-usage-chart` command still works as an alias, but to switch to the new package:
-
-```bash
-npm rm -g claude-usage-chart
-npm i -g https://github.com/Clovis500c/claude-stats/releases/latest/download/claude-stats.tgz
-claude-stats schedule --every 1d   # points the automatic refresh at the new install
-```
-
 Your options, published card and README snippet stay the same.
 
 ## Uninstall

@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- The release workflow can also be run by hand from the Actions tab; it then tags the commit with the `package.json` version.
+
 ## [0.6.0] - 2026-09-24
 
 ### Added

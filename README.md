@@ -243,7 +243,7 @@ npm run preview          # render your own card to preview/claude-stats.svg
 ### Releasing
 
 1. Bump `version` in `package.json` and move the *Unreleased* notes in [`CHANGELOG.md`](CHANGELOG.md) under the new version.
-2. Tag and push: `git tag v0.6.0 && git push origin v0.6.0`.
+2. Tag and push (`git tag v0.6.0 && git push origin v0.6.0`), or run the **Release** workflow from the Actions tab, which tags the current commit for you.
 3. The [release workflow](.github/workflows/release.yml) runs the tests, packs `claude-usage-chart.tgz` and publishes the GitHub release.
 
 ## Credits

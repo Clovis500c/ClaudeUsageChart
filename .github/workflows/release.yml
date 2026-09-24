@@ -1,10 +1,13 @@
 name: Release
 
-# Push a tag like v0.6.0 (matching package.json) to publish a GitHub release
-# with the installable claude-usage-chart.tgz attached.
+# Publishes a GitHub release with the installable claude-usage-chart.tgz.
+# Either push a tag like v0.6.0 (matching package.json), or run this workflow
+# from the Actions tab: it then tags the current commit with the
+# package.json version.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,19 +20,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check the tag matches package.json
+      - name: Resolve the tag
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          version=$(node -p "require('./package.json').version")
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+          tag="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$tag" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $tag"
             exit 1
           fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "::error::Release $tag already exists; bump the version in package.json first"
+            exit 1
+          fi
+          echo "name=$tag" >> "$GITHUB_OUTPUT"
       - run: npm test
       - name: Pack
         run: mv "$(npm pack --silent)" claude-usage-chart.tgz
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.name }}
         run: |
-          notes=$(awk -v v="${GITHUB_REF_NAME#v}" '$0 ~ "^## \\[?"v"\\]?" {f=1; next} /^## / {f=0} f' CHANGELOG.md)
-          gh release create "$GITHUB_REF_NAME" claude-usage-chart.tgz --title "$GITHUB_REF_NAME" --notes "${notes:-See CHANGELOG.md}"
+          notes=$(awk -v v="${TAG#v}" '$0 ~ "^## \\[?"v"\\]?" {f=1; next} /^## / {f=0} f' CHANGELOG.md)
+          gh release create "$TAG" claude-usage-chart.tgz --target "$GITHUB_SHA" --title "$TAG" --notes "${notes:-See CHANGELOG.md}"
